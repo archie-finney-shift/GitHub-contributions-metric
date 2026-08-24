@@ -150,8 +150,8 @@ function isoWeekInfo(dateString) {
 }
 
 function clearBars() {
-  for (const child of barsGroup.children) {
-    barsGroup.remove(child);
+  while (barsGroup.children.length > 0) {
+    barsGroup.remove(barsGroup.children[0]);
   }
   state.bars = [];
 }

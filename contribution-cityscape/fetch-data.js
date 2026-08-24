@@ -227,6 +227,8 @@ async function main() {
 
       // GitHub's GraphQL API limits this dataset to maxRepositories: 100 per window.
       // Users active across 100+ repositories in a period may have low-volume repos omitted.
+      // Each repository bucket here also requests first:100 contribution nodes, which can
+      // undercount extremely high-volume single-repository periods.
       aggregateChunk(days, collection, reviewStatesCounted, excludeSelfReviews);
     }
 
