@@ -60,6 +60,22 @@ body {
   font-size: 0.84rem;
 }
 
+#overall-score {
+  display: grid;
+  gap: 0.2rem;
+  color: var(--ink-dim);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-align: right;
+  text-transform: uppercase;
+}
+
+#overall-score output {
+  color: var(--amber);
+  font-size: 1.1rem;
+  letter-spacing: 0;
+}
+
 #user-picker {
   pointer-events: auto;
   display: inline-grid;

@@ -23,7 +23,11 @@
     <header id="header">
       <div id="title-block">
         <h1>Contribution Cityscape</h1>
-        <p>Each block is a day. Height is earned, not counted.</p>
+        <p>Each block is a day. Height shows the configured contribution score.</p>
+      </div>
+      <div id="overall-score" aria-live="polite">
+        <span>Overall score</span>
+        <output id="overall-score-out">0.00</output>
       </div>
       <label id="user-picker" for="user-select">
         User
@@ -43,6 +47,11 @@
           <span><span class="badge review"></span>PR reviews</span>
           <input id="w-r" type="range" min="0" max="20" step="0.5" />
           <output id="w-r-out"></output>
+        </label>
+        <label class="control">
+          <span><span class="badge review"></span>Review-comment bonus</span>
+          <input id="w-rc" type="range" min="0" max="5" step="0.25" />
+          <output id="w-rc-out"></output>
         </label>
         <label class="control">
           <span><span class="badge commit"></span>Commits</span>
@@ -71,9 +80,9 @@
       <section>
         <h2>Legend</h2>
         <ul class="legend">
-          <li><span class="badge pr"></span>PR-dominant — the shipper</li>
-          <li><span class="badge review"></span>Review-dominant — the reviewer</li>
-          <li><span class="badge commit"></span>Commit-dominant — the grinder</li>
+          <li><span class="badge pr"></span>PR-dominant day</li>
+          <li><span class="badge review"></span>Review-dominant day</li>
+          <li><span class="badge commit"></span>Commit-dominant day</li>
         </ul>
       </section>
 

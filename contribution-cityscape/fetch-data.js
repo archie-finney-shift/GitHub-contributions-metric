@@ -22,6 +22,7 @@ query($login: String!, $from: DateTime!, $to: DateTime!) {
               state
               author { login }
               pullRequest { author { login } }
+              comments { totalCount }
             }
           }
         }
@@ -97,7 +98,7 @@ function splitIntoYearChunks(fromDate, toDate) {
 
 function ensureDay(days, key) {
   if (!days[key]) {
-    days[key] = { P: 0, R: 0, C: 0 };
+    days[key] = { P: 0, R: 0, RC: 0, C: 0 };
   }
   return days[key];
 }
@@ -155,7 +156,9 @@ function aggregateChunk(days, collection, countedReviewStates, excludeSelfReview
       }
 
       const dayKey = node.occurredAt.slice(0, 10);
-      ensureDay(days, dayKey).R += 1;
+      const day = ensureDay(days, dayKey);
+      day.R += 1;
+      day.RC += Number(review?.comments?.totalCount ?? 0);
     }
   }
 

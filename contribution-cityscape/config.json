@@ -2,7 +2,8 @@
   "weights": {
     "pullRequests": 10,
     "reviews": 8,
-    "commits": 3
+    "commits": 3,
+    "reviewComment": 0.5
   },
   "commitDecay": "sqrt",
   "dailyCommitCap": 25,

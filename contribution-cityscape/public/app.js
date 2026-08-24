@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 const FALLBACK_DEFAULTS = {
-  weights: { pullRequests: 10, reviews: 8, commits: 3 },
+  weights: { pullRequests: 10, reviews: 8, commits: 3, reviewComment: 0.5 },
   commitDecay: "sqrt",
   dailyCommitCap: 25
 };
@@ -15,7 +15,7 @@ const COLORS = {
 };
 
 const state = {
-  weights: { P: 10, R: 8, C: 3 },
+  weights: { P: 10, R: 8, C: 3, RC: 0.5 },
   commitDecay: "sqrt",
   commitCap: 25,
   dataset: {},
@@ -26,6 +26,7 @@ const state = {
 const sceneRoot = document.getElementById("scene-root");
 const tooltip = document.getElementById("tooltip");
 const userSelect = document.getElementById("user-select");
+const overallScoreOut = document.getElementById("overall-score-out");
 const fileInput = document.getElementById("file-input");
 const decaySelect = document.getElementById("commit-decay");
 const capSlider = document.getElementById("commit-cap");
@@ -34,9 +35,11 @@ const resetBtn = document.getElementById("reset-defaults");
 
 const sliderP = document.getElementById("w-p");
 const sliderR = document.getElementById("w-r");
+const sliderRC = document.getElementById("w-rc");
 const sliderC = document.getElementById("w-c");
 const outP = document.getElementById("w-p-out");
 const outR = document.getElementById("w-r-out");
+const outRC = document.getElementById("w-rc-out");
 const outC = document.getElementById("w-c-out");
 
 const manualDate = document.getElementById("m-date");
@@ -107,22 +110,24 @@ function computeScore(entry) {
   const raw = {
     P: Math.max(0, Number(entry?.P) || 0),
     R: Math.max(0, Number(entry?.R) || 0),
+    RC: Math.max(0, Number(entry?.RC) || 0),
     C: Math.max(0, Number(entry?.C) || 0)
   };
 
   const pScore = state.weights.P * raw.P;
   const rScore = state.weights.R * raw.R;
+  const rcScore = state.weights.RC * raw.RC;
   const cScore = state.weights.C * decay(raw.C);
-  const total = pScore + rScore + cScore;
+  const total = pScore + rScore + rcScore + cScore;
 
   let dominant = "neutral";
   if (total > 0) {
     if (pScore >= rScore && pScore >= cScore) dominant = "pr";
-    else if (rScore >= cScore) dominant = "review";
+    else if (rScore + rcScore >= cScore) dominant = "review";
     else dominant = "commit";
   }
 
-  return { pScore, rScore, cScore, total, dominant, raw };
+  return { pScore, rScore, rcScore, cScore, total, dominant, raw };
 }
 
 function isoWeekInfo(dateString) {
@@ -188,12 +193,14 @@ function buildBars() {
   const userData = state.dataset?.[state.currentUser];
   const days = userData?.days;
   if (!days || typeof days !== "object") {
+    overallScoreOut.textContent = "0.00";
     tooltip.classList.add("hidden");
     return;
   }
 
   const entries = Object.entries(days).sort(([a], [b]) => a.localeCompare(b));
   if (entries.length === 0) {
+    overallScoreOut.textContent = "0.00";
     tooltip.classList.add("hidden");
     recenterCameraTarget();
     return;
@@ -201,9 +208,11 @@ function buildBars() {
 
   const weekStarts = entries.map(([date]) => isoWeekInfo(date).weekStartMs);
   const minWeekStart = Math.min(...weekStarts);
+  let overallScore = 0;
 
   for (const [date, entry] of entries) {
     const score = computeScore(entry);
+    overallScore += score.total;
     if (score.total === 0) continue;
 
     const info = isoWeekInfo(date);
@@ -221,12 +230,14 @@ function buildBars() {
     state.bars.push({ mesh, date, entry, score });
   }
 
+  overallScoreOut.textContent = overallScore.toFixed(2);
   recenterCameraTarget();
 }
 
 function updateWeightOutputs() {
   outP.textContent = state.weights.P.toFixed(1);
   outR.textContent = state.weights.R.toFixed(1);
+  outRC.textContent = state.weights.RC.toFixed(2);
   outC.textContent = state.weights.C.toFixed(1);
   capOut.textContent = String(state.commitCap);
 }
@@ -234,6 +245,7 @@ function updateWeightOutputs() {
 function syncControlsFromState() {
   sliderP.value = String(state.weights.P);
   sliderR.value = String(state.weights.R);
+  sliderRC.value = String(state.weights.RC);
   sliderC.value = String(state.weights.C);
   decaySelect.value = state.commitDecay;
   capSlider.value = String(state.commitCap);
@@ -243,6 +255,7 @@ function syncControlsFromState() {
 function applyDefaults(defaults) {
   state.weights.P = Number(defaults.weights?.pullRequests ?? FALLBACK_DEFAULTS.weights.pullRequests);
   state.weights.R = Number(defaults.weights?.reviews ?? FALLBACK_DEFAULTS.weights.reviews);
+  state.weights.RC = Number(defaults.weights?.reviewComment ?? FALLBACK_DEFAULTS.weights.reviewComment);
   state.weights.C = Number(defaults.weights?.commits ?? FALLBACK_DEFAULTS.weights.commits);
   state.commitDecay = defaults.commitDecay ?? FALLBACK_DEFAULTS.commitDecay;
   state.commitCap = Number(defaults.dailyCommitCap ?? FALLBACK_DEFAULTS.dailyCommitCap);
@@ -295,6 +308,7 @@ function renderTooltip(bar, x, y) {
     <div class="date">${bar.date}</div>
     <div class="row"><span>PR (${score.raw.P})</span><span>${score.pScore.toFixed(2)}</span></div>
     <div class="row"><span>Review (${score.raw.R})</span><span>${score.rScore.toFixed(2)}</span></div>
+    <div class="row"><span>Review comments (${score.raw.RC})</span><span>${score.rcScore.toFixed(2)}</span></div>
     <div class="row"><span>Commit (${score.raw.C})</span><span>${score.cScore.toFixed(2)}</span></div>
     <div class="total"><span>Total</span><span>${score.total.toFixed(2)}</span></div>
   `;
@@ -345,6 +359,12 @@ function wireEvents() {
 
   sliderR.addEventListener("input", () => {
     state.weights.R = Number(sliderR.value);
+    updateWeightOutputs();
+    buildBars();
+  });
+
+  sliderRC.addEventListener("input", () => {
+    state.weights.RC = Number(sliderRC.value);
     updateWeightOutputs();
     buildBars();
   });

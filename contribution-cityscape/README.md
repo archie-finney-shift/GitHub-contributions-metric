@@ -1,14 +1,15 @@
 # Contribution Cityscape
 
-Contribution Cityscape is a plain Node.js + vanilla Three.js project that fetches **real GitHub contribution data** and renders it as an interactive 3D bar-chart skyline.
+Contribution Cityscape is a plain Node.js + vanilla Three.js project that fetches **GitHub contribution data** and renders it as an interactive 3D bar-chart skyline.
 
-It is designed as a fair alternative to raw contribution graphs: it emphasizes **shipped, reviewed, integrated work** over sheer commit volume.
+It is an exploratory, configurable way to view pull requests, reviews, review comments, and commits over time.
 
 ## What it measures
 
 This model intentionally includes:
 - Pull Requests (P)
 - PR Reviews (R)
+- Review comments (RC)
 - Commits (C, with cap + decay)
 
 And intentionally excludes:
@@ -19,13 +20,14 @@ And intentionally excludes:
 For each day:
 
 ```txt
-T = (Wp × P) + (Wr × R) + (Wc × decay(C))
+T = (Wp × P) + (Wr × R) + (Wrc × RC) + (Wc × decay(C))
 ```
 
 Default weights and behavior:
 - `Wp = 10`
 - `Wr = 8`
 - `Wc = 3`
+- `Wrc = 0.5`
 - `daily commit cap = 25`
 - default decay curve = `sqrt`
 
@@ -34,11 +36,9 @@ Decay curves:
 - `log` (stricter): `log2(min(c, cap) + 1)`
 - `linear` (no squash incentive): `min(c, cap)`
 
-Rationale:
-- PRs are weighted highest to reward shipping coherent work.
-- Reviews are nearly as high to reward unblocking teammates and reduce silo behavior.
-- Commits are decayed so 1–2 clean commits still score well, while high-volume WIP commits do not dominate.
-- Only `APPROVED` and `CHANGES_REQUESTED` PR reviews count.
+Configuration:
+- The default review states are `APPROVED` and `CHANGES_REQUESTED`; adjust `reviewStatesCounted` in `config.json` to match the review practices being explored.
+- Each review comment can contribute an adjustable bonus, allowing detailed review feedback to be represented separately from the submitted review count.
 - Self-reviews are excluded (`review author !== PR author`).
 - All weighting/decay is applied client-side, so sliders reshape the skyline instantly without re-fetching.
 
@@ -93,13 +93,14 @@ http://localhost:8080/public/
 - **X axis**: ISO week index
 - **Z axis**: day of week (Mon → Sun)
 - **Bar height**: daily total score `T`
+- **Overall score**: sum of the displayed user's daily scores for the loaded range
 - **Bar color**: dominant weighted category for that day
-  - Blue: PR-dominant (shipper)
-  - Purple: Review-dominant (reviewer)
-  - Green: Commit-dominant (grinder)
+  - Blue: PR-dominant
+  - Purple: Review-dominant
+  - Green: Commit-dominant
 
 Controls:
-- Weight sliders for PR / Review / Commit
+- Weight sliders for PR / Review / Review-comment bonus / Commit
 - Commit decay selector (`sqrt`, `log`, `linear`)
 - Daily commit cap slider
 - User dropdown for switching loaded users
@@ -114,6 +115,6 @@ Manual entry note: percentages do not have to sum to 100; the remainder is treat
 - **Scoring logic**: `public/app.js` (`decay()` and `computeScore()`)
 - **Fetch/aggregation logic**: `fetch-data.js` (range chunking, GraphQL fetch, per-day aggregation)
 
-## Notes on fairness
+## Scope
 
-This metric is a heuristic for surfacing collaboration patterns and starting better conversations. It is **not** an automated performance ranking system. Outliers should trigger context and discussion, not verdicts.
+This project is for interest and experimentation with configurable contribution metrics. Scores are dependent on the selected inputs and settings.
