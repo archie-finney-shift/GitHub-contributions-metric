@@ -24,10 +24,10 @@ T = (Wp × P) + (Wr × R) + (Wrc × RC) + (Wc × decay(C))
 ```
 
 Default weights and behavior:
-- `Wp = 10`
-- `Wr = 8`
-- `Wc = 3`
-- `Wrc = 0.5`
+- `Wp = 1`
+- `Wr = 1`
+- `Wc = 1`
+- `Wrc = 1`
 - `daily commit cap = 25`
 - default decay curve = `sqrt`
 

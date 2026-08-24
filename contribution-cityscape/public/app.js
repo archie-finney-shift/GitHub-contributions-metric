@@ -2,7 +2,7 @@ import * as THREE from "three";
 import { OrbitControls } from "three/addons/controls/OrbitControls.js";
 
 const FALLBACK_DEFAULTS = {
-  weights: { pullRequests: 10, reviews: 8, commits: 3, reviewComment: 0.5 },
+  weights: { pullRequests: 1, reviews: 1, commits: 1, reviewComment: 1 },
   commitDecay: "sqrt",
   dailyCommitCap: 25
 };
@@ -15,7 +15,7 @@ const COLORS = {
 };
 
 const state = {
-  weights: { P: 10, R: 8, C: 3, RC: 0.5 },
+  weights: { P: 1, R: 1, C: 1, RC: 1 },
   commitDecay: "sqrt",
   commitCap: 25,
   dataset: {},
