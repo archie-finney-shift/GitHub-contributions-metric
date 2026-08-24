@@ -46,6 +46,7 @@ const manualDate = document.getElementById("m-date");
 const manualTotal = document.getElementById("m-total");
 const manualPctP = document.getElementById("m-pct-p");
 const manualPctR = document.getElementById("m-pct-r");
+const manualReviewComments = document.getElementById("m-rc");
 const manualPctC = document.getElementById("m-pct-c");
 const manualAdd = document.getElementById("manual-add");
 
@@ -434,6 +435,7 @@ function wireEvents() {
 
     const pctP = Number(manualPctP.value) || 0;
     const pctR = Number(manualPctR.value) || 0;
+    const RC = Math.max(0, Math.round(Number(manualReviewComments.value) || 0));
     const pctC = Number(manualPctC.value) || 0;
 
     const P = Math.round(total * (pctP / 100));
@@ -447,7 +449,7 @@ function wireEvents() {
       state.dataset[user].days = {};
     }
 
-    state.dataset[user].days[date] = { P, R, RC: 0, C };
+    state.dataset[user].days[date] = { P, R, RC, C };
     updateRangeFromDay(user, date);
     buildBars();
   });
