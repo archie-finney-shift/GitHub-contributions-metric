@@ -89,7 +89,7 @@ function splitIntoYearChunks(fromDate, toDate) {
       to: new Date(end)
     });
 
-    cursor.setUTCDate(end.getUTCDate() + 1);
+    cursor.setTime(end.getTime() + 86400000);
   }
 
   return chunks;
