@@ -122,7 +122,7 @@ function computeScore(entry) {
 
   let dominant = "neutral";
   if (total > 0) {
-    if (pScore >= rScore && pScore >= cScore) dominant = "pr";
+    if (pScore >= rScore + rcScore && pScore >= cScore) dominant = "pr";
     else if (rScore + rcScore >= cScore) dominant = "review";
     else dominant = "commit";
   }
@@ -447,7 +447,7 @@ function wireEvents() {
       state.dataset[user].days = {};
     }
 
-    state.dataset[user].days[date] = { P, R, C };
+    state.dataset[user].days[date] = { P, R, RC: 0, C };
     updateRangeFromDay(user, date);
     buildBars();
   });
