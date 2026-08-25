@@ -1,0 +1,13 @@
+{
+  "weights": {
+    "pullRequests": 1,
+    "reviews": 1,
+    "commits": 1,
+    "reviewComment": 1
+  },
+  "commitDecay": "sqrt",
+  "dailyCommitCap": 25,
+  "reviewStatesCounted": ["APPROVED", "CHANGES_REQUESTED"],
+  "excludeSelfReviews": true,
+  "issuesIncluded": false
+}

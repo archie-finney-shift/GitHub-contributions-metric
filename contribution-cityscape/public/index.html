@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Contribution Cityscape</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="./style.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <div id="scene-root"></div>
+
+    <header id="header">
+      <div id="title-block">
+        <h1>Contribution Cityscape</h1>
+        <p>Each block is a day. Height shows the configured contribution score.</p>
+      </div>
+      <div id="overall-score" aria-live="polite">
+        <span>Overall score</span>
+        <output id="overall-score-out">0.00</output>
+      </div>
+      <label id="user-picker" for="user-select">
+        User
+        <select id="user-select"></select>
+      </label>
+    </header>
+
+    <aside id="panel">
+      <section>
+        <h2>Weights</h2>
+        <label class="control">
+          <span><span class="badge pr"></span>Pull requests</span>
+          <input id="w-p" type="range" min="0" max="20" step="0.5" />
+          <output id="w-p-out"></output>
+        </label>
+        <label class="control">
+          <span><span class="badge review"></span>PR reviews</span>
+          <input id="w-r" type="range" min="0" max="20" step="0.5" />
+          <output id="w-r-out"></output>
+        </label>
+        <label class="control">
+          <span><span class="badge review"></span>Review-comment bonus</span>
+          <input id="w-rc" type="range" min="0" max="5" step="0.25" />
+          <output id="w-rc-out"></output>
+        </label>
+        <label class="control">
+          <span><span class="badge commit"></span>Commits</span>
+          <input id="w-c" type="range" min="0" max="20" step="0.5" />
+          <output id="w-c-out"></output>
+        </label>
+      </section>
+
+      <section>
+        <h2>Commit handling</h2>
+        <label class="control">
+          <span>Decay curve</span>
+          <select id="commit-decay">
+            <option value="sqrt">sqrt</option>
+            <option value="log">log</option>
+            <option value="linear">linear</option>
+          </select>
+        </label>
+        <label class="control">
+          <span>Daily commit cap</span>
+          <input id="commit-cap" type="range" min="1" max="100" step="1" />
+          <output id="commit-cap-out"></output>
+        </label>
+      </section>
+
+      <section>
+        <h2>Legend</h2>
+        <ul class="legend">
+          <li><span class="badge pr"></span>PR-dominant day</li>
+          <li><span class="badge review"></span>Review-dominant day</li>
+          <li><span class="badge commit"></span>Commit-dominant day</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Data</h2>
+        <label class="file-btn" for="file-input">Load data JSON</label>
+        <input id="file-input" type="file" accept="application/json" />
+        <button id="reset-defaults" type="button">Reset weights to defaults</button>
+      </section>
+
+      <section>
+        <h2>Manual entry</h2>
+        <div class="manual-grid">
+          <label>Date <input id="m-date" type="date" /></label>
+          <label>Total contributions <input id="m-total" type="number" min="1" step="1" /></label>
+          <label>% PR <input id="m-pct-p" type="number" step="0.1" value="0" /></label>
+          <label>% Reviews <input id="m-pct-r" type="number" step="0.1" value="0" /></label>
+          <label>Review comments <input id="m-rc" type="number" min="0" step="1" value="0" /></label>
+          <label>% Commits <input id="m-pct-c" type="number" step="0.1" value="0" /></label>
+        </div>
+        <button id="manual-add" type="button">Add day</button>
+        <p class="hint">Percentages do not need to sum to 100; the remainder is treated as excluded Issues share (unscored).</p>
+      </section>
+    </aside>
+
+    <div id="tooltip" class="hidden"></div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
