@@ -57,7 +57,8 @@ sceneRoot.appendChild(renderer.domElement);
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x0a0d12);
-scene.fog = new THREE.FogExp2(0x0a0d12, 0.02);
+// Fog density reduced from 0.02 to 0.002 to clear the view
+scene.fog = new THREE.FogExp2(0x0a0d12, 0.002); 
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
 camera.position.set(38, 44, 38);
@@ -475,8 +476,9 @@ async function init() {
   wireEvents();
 
   try {
-    const res = await fetch("../data/sample-data.json", { cache: "no-store" });
-    if (!res.ok) throw new Error("sample data missing");
+    // Data path updated to target the generated contributions.json file
+    const res = await fetch("../data/contributions.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("contributions data missing");
     const sample = await res.json();
     state.dataset = sample && typeof sample === "object" ? sample : {};
   } catch {
